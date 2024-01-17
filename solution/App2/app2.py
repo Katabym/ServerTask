@@ -1,9 +1,11 @@
 import asyncio
 import time
 from nats.aio.client import Client as NATS
+from config import your_ip as IP
+from config import port
 
 async def handler(msg):
-    # Получаем реальное время в тик и
+    # Получаем тик времени и
     # Округляем время до мс
     t_real = time.time()
     t_real_rounded = float('{:.4f}'.format(t_real))
@@ -21,14 +23,14 @@ async def handler(msg):
 async def pub_sub_loop():
     # Подключаемся к локальному серверу NATS на порт 4222
     nc = NATS()
-    await nc.connect(servers=["nats://localhost:4222"])
+    await nc.connect(servers=[f"nats://{IP}:{port}"])
 
     # Подписываюсь на топик от первого приложения и
     # указываю обработчик  полученного сообщения
     await nc.subscribe("app1_tick", cb=handler)
 
     while True:
-        # Получаем реальное время в тик и
+        # Получаем тик времени и
         # Округляем время до мс
         t_real = time.time()
         t_rounded = float('{:.4f}'.format(t_real))
