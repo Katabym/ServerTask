@@ -1,6 +1,12 @@
 import asyncio
 import time
 from nats.aio.client import Client as NATS
+import os
+import sys
+# Получаем путь к корневому каталогу проекта
+root_path = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+# Добавляем путь к корневому каталогу в PYTHONPATH
+sys.path.append(root_path)
 from config import your_ip as IP
 from config import port
 
@@ -25,9 +31,9 @@ async def pub_sub_loop():
     nc = NATS()
     await nc.connect(servers=[f"nats://{IP}:{port}"])
 
-    # Подписываюсь на топик от второго приложения и
+    # Подписываюсь на топик от первого приложения и
     # указываю обработчик  полученного сообщения
-    await nc.subscribe("app2_tick", cb=handler)
+    await nc.subscribe("app1_tick", cb=handler)
 
     while True:
         # Получаем тик времени и
@@ -36,7 +42,7 @@ async def pub_sub_loop():
         t_rounded = float('{:.4f}'.format(t_real))
 
         # Публикуем сообщение с округленным временем в шину данных
-        await nc.publish("app1_tick", str(t_rounded).encode())
+        await nc.publish("app2_tick", str(t_rounded).encode())
         # Ставлю задержку между публикациями в 10 мс
         await asyncio.sleep(0.01)
 
